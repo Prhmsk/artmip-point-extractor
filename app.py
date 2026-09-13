@@ -120,6 +120,48 @@ with st.expander("🔬 Scientific interpretation"):
         """
     )
 
+```python
+# ============================================================
+# DEVELOPERS & AFFILIATIONS
+# ============================================================
+
+with st.expander("👥 Developers & Affiliations", expanded=False):
+
+    st.markdown(
+        """
+        ### Developers
+
+        This application was developed as a collaborative research
+        initiative in hydrology, hydroinformatics, and climate science.
+
+        **Alireza Shekaari**  
+        PhD Candidate in Civil Engineering (Water & Environmental Engineering)
+
+        **Professor Vahid Nourani**  
+        Professor
+
+        **Professor Chunwei Zhang**  
+        Professor
+
+        **Dr. Elnaz Sharghi**  
+        Researcher
+
+        ### Institutional Affiliations
+
+        **Center of Excellence in Hydroinformatics**  
+        Faculty of Civil Engineering  
+        University of Tabriz, Iran
+
+        **Shaoxing University**  
+        China
+
+        ### Research Areas
+
+        Hydrology · Climate Change · Hydroclimatology ·
+        Hydrometeorology · Hydrogeology · Hydroinformatics
+        """
+    )
+```
 
 # ============================================================
 # SIDEBAR CONFIGURATION
