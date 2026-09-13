@@ -133,36 +133,26 @@ with st.expander("👥 Developers & Affiliations", expanded=False):
         This application was developed as a collaborative research
         initiative in hydrology, hydroinformatics, and climate science.
 
-        **Professor Vahid Nourani**  
-        Professor of Civil and Environmental Engineering, University of Tabriz , Near East University
+        **Professor Vahid Nourani** *,Professor of Civil and Environmental Engineering, University of Tabriz , Near East University*
 
-        **Professor Chunwei Zhang**  
-        Professor of Structural Engineering, Shenyang University of Technology
+        **Professor Chunwei Zhang** *,Professor of Structural Engineering, Shenyang University of Technology*
 
-        **Professor Abdorreza Vaezihir**
-        Professor of Hydrogeology, University of Tabriz
+        **Professor Abdorreza Vaezihir** *,Professor of Hydrogeology, University of Tabriz*
 
-        **Dr. Elnaz Sharghi**  
-        Associate Professor of Civil Engineering, University of Tabriz
+        **Dr. Elnaz Sharghi** *,Associate Professor of Civil Engineering, University of Tabriz*
 
-        **Alireza Shekaari**  
-        PhD Candidate in Civil and Environmental Engineering
+        **Alireza Shekaari** *,PhD Candidate in Civil and Environmental Engineering*
 
         ### Institutional Affiliations
 
-        **Center of Excellence in Hydroinformatics**  
-        *Faculty of Civil Engineering  
+        **Center of Excellence in Hydroinformatics** *,Faculty of Civil Engineering  
         University of Tabriz, Iran*
 
-        **Shenyang University of Technology**
-         *China*
+        **Shenyang University of Technology** *,China*
 
-        **Disaster Prevention Research Institute (DPRI)**
-         *Kyoto University*
-         *Kyoto, Japan*
+        **Disaster Prevention Research Institute (DPRI)** *,Kyoto University* *,Japan*
 
-        **Near East University**
-         *cyprus*
+        **Near East University** *,cyprus*
 
         ### Research Areas
 
