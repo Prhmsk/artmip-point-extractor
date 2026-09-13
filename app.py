@@ -152,14 +152,14 @@ with st.expander("👥 Developers & Affiliations", expanded=False):
         University of Tabriz, Iran
 
         **Shaoxing University**
-        **China**
+        *China*
 
         **Disaster Prevention Research Institute (DPRI)**
-        **Kyoto University**
-        **Kyoto, Japan**
+        *Kyoto University*
+        *Kyoto, Japan*
 
         **Near East University**
-        **cyprus**
+        *cyprus*
 
         ### Research Areas
 
