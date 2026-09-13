@@ -151,7 +151,7 @@ with st.expander("👥 Developers & Affiliations", expanded=False):
         Faculty of Civil Engineering  
         University of Tabriz, Iran
 
-        **Shaoxing University**  
+        **Shaoxing University**
         China
 
         **Disaster Prevention Research Institute (DPRI)**
@@ -159,10 +159,6 @@ with st.expander("👥 Developers & Affiliations", expanded=False):
         Kyoto, Japan
 
         **Near East University**
-        cyprus
-
-
-        **World Peace University**
         cyprus
 
         ### Research Areas
