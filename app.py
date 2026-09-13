@@ -140,6 +140,7 @@ with st.expander("👥 Developers & Affiliations", expanded=False):
         Professor of Structural Engineering, Shenyang University of Technology
 
         **Professor Abdorreza Vaezihir**
+        
         Professor of Hydrogeology, University of Tabriz
 
         **Dr. Elnaz Sharghi**  
