@@ -120,7 +120,6 @@ with st.expander("🔬 Scientific interpretation"):
         """
     )
 
-```python
 # ============================================================
 # DEVELOPERS & AFFILIATIONS
 # ============================================================
@@ -161,8 +160,6 @@ with st.expander("👥 Developers & Affiliations", expanded=False):
         Hydrometeorology · Hydrogeology · Hydroinformatics
         """
     )
-```
-
 # ============================================================
 # SIDEBAR CONFIGURATION
 # ============================================================
