@@ -133,9 +133,6 @@ with st.expander("👥 Developers & Affiliations", expanded=False):
         This application was developed as a collaborative research
         initiative in hydrology, hydroinformatics, and climate science.
 
-        **Alireza Shekaari**  
-        PhD Candidate in Civil and Environmental Engineering
-
         **Professor Vahid Nourani**  
         Professor of Civil and Environmental Engineering, University of Tabriz , Near East University
 
@@ -145,6 +142,9 @@ with st.expander("👥 Developers & Affiliations", expanded=False):
         **Dr. Elnaz Sharghi**  
         Associate Professor of Civil Engineering, University of Tabriz
 
+        **Alireza Shekaari**  
+        PhD Candidate in Civil and Environmental Engineering
+
         ### Institutional Affiliations
 
         **Center of Excellence in Hydroinformatics**  
@@ -153,6 +153,17 @@ with st.expander("👥 Developers & Affiliations", expanded=False):
 
         **Shaoxing University**  
         China
+
+        **Disaster Prevention Research Institute (DPRI)**
+        Kyoto University
+        Kyoto, Japan
+
+        **Near East University**
+        cyprus
+
+
+        **World Peace University**
+        cyprus
 
         ### Research Areas
 
