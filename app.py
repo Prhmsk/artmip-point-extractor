@@ -330,20 +330,184 @@ with st.sidebar:
         "(hourly source tags, sampled at the selected interval)."
     )
 
+
 # ============================================================
-# ATMOSPHERIC RIVER TREND ANALYSIS
+# ATMOSPHERIC RIVER TREND PLOT
 # ============================================================
+
+import matplotlib.pyplot as plt
+
 
 def plot_ar_trend(daily, events):
 
-    import matplotlib.pyplot as plt
+    st.subheader("📈 Atmospheric River Temporal Trends")
 
 
-    st.subheader(
-        "📈 Atmospheric River Temporal Trends"
+    if daily is None or daily.empty:
+
+        st.warning(
+            "No daily catalogue available for trend analysis."
+        )
+        return
+
+
+    daily = daily.copy()
+
+
+    # -----------------------------
+    # Detect AR activity column
+    # -----------------------------
+
+    ar_candidates = [
+
+        "ARTMIP_AR",
+        "GW15_AR",
+        "AR_activity",
+        "AR",
+        "is_AR"
+
+    ]
+
+
+    ar_column = None
+
+
+    for col in ar_candidates:
+
+        if col in daily.columns:
+
+            ar_column = col
+            break
+
+
+
+    if ar_column is None:
+
+        st.error(
+            "Atmospheric River activity column was not detected "
+            "in the daily catalogue."
+        )
+
+        st.write(
+            "Available columns:"
+        )
+
+        st.write(
+            list(daily.columns)
+        )
+
+        return
+
+
+
+    # -----------------------------
+    # Annual aggregation
+    # -----------------------------
+
+
+    if "year" not in daily.columns:
+
+        daily["year"] = pd.to_datetime(
+            daily["date"]
+        ).dt.year
+
+
+
+    annual = (
+
+        daily
+        .groupby("year")[ar_column]
+        .sum()
+        .reset_index()
+
     )
 
 
+    annual.rename(
+
+        columns={
+            ar_column:
+            "AR_days"
+        },
+
+        inplace=True
+
+    )
+
+
+    # -----------------------------
+    # Plot
+    # -----------------------------
+
+
+    fig, ax = plt.subplots(
+        figsize=(10,4)
+    )
+
+
+    ax.plot(
+
+        annual["year"],
+
+        annual["AR_days"],
+
+        marker="o"
+
+    )
+
+
+    ax.set_xlabel(
+        "Year"
+    )
+
+
+    ax.set_ylabel(
+        "AR active days"
+    )
+
+
+    ax.set_title(
+        "Annual Atmospheric River Activity"
+    )
+
+
+    ax.grid(
+        True
+    )
+
+
+    st.pyplot(
+        fig
+    )
+
+
+    # -----------------------------
+    # Trend statistics
+    # -----------------------------
+
+
+    if len(annual) > 2:
+
+
+        import numpy as np
+
+
+        slope, intercept = np.polyfit(
+
+            annual["year"],
+
+            annual["AR_days"],
+
+            1
+
+        )
+
+
+        st.info(
+
+            f"Linear trend: {slope:.3f} AR days/year"
+
+        )
     # --------------------------------------------------------
     # Prepare daily catalogue
     # --------------------------------------------------------
