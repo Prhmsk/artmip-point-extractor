@@ -57,7 +57,7 @@ with logo_left:
 with logo_right:
     st.image(
         "assets/shaoxing_university_logo.png",
-        width=450,
+        width=500,
     )
 
 
