@@ -336,6 +336,8 @@ with st.sidebar:
 # ============================================================
 
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 
 def plot_ar_trend(daily, events):
@@ -343,28 +345,75 @@ def plot_ar_trend(daily, events):
     st.subheader("📈 Atmospheric River Temporal Trends")
 
 
+    # --------------------------------------------------------
+    # Check input
+    # --------------------------------------------------------
+
     if daily is None or daily.empty:
 
         st.warning(
             "No daily catalogue available for trend analysis."
         )
+
         return
 
 
     daily = daily.copy()
 
 
-    # -----------------------------
+
+    # --------------------------------------------------------
+    # Prepare dates
+    # --------------------------------------------------------
+
+    if "date" in daily.columns:
+
+        daily["date"] = pd.to_datetime(
+            daily["date"]
+        )
+
+    else:
+
+        st.error(
+            "Daily catalogue does not contain date column."
+        )
+
+        return
+
+
+
+    if "year" not in daily.columns:
+
+        daily["year"] = (
+            daily["date"]
+            .dt
+            .year
+        )
+
+
+
+    # --------------------------------------------------------
     # Detect AR activity column
-    # -----------------------------
+    # --------------------------------------------------------
 
     ar_candidates = [
 
+        # Current ARTMIP output
         "ARTMIP_AR",
+
+        # Previous versions
         "GW15_AR",
+
         "AR_activity",
+
+        "AR_active",
+
         "AR",
-        "is_AR"
+
+        "is_AR",
+
+        # Alternative intensity variables
+        "n_AR_timesteps"
 
     ]
 
@@ -383,41 +432,50 @@ def plot_ar_trend(daily, events):
 
     if ar_column is None:
 
+
         st.error(
-            "Atmospheric River activity column was not detected "
-            "in the daily catalogue."
+            "Atmospheric River activity column was not detected in the daily catalogue."
         )
+
 
         st.write(
             "Available columns:"
         )
 
+
         st.write(
             list(daily.columns)
         )
+
 
         return
 
 
 
-    # -----------------------------
-    # Annual aggregation
-    # -----------------------------
+    st.success(
+        f"Detected AR activity variable: `{ar_column}`"
+    )
 
 
-    if "year" not in daily.columns:
 
-        daily["year"] = pd.to_datetime(
-            daily["date"]
-        ).dt.year
+    # ========================================================
+    # 1. Annual AR Activity Trend
+    # ========================================================
 
+
+    st.markdown(
+        "### Annual Atmospheric River Activity"
+    )
 
 
     annual = (
 
         daily
+
         .groupby("year")[ar_column]
+
         .sum()
+
         .reset_index()
 
     )
@@ -435,13 +493,9 @@ def plot_ar_trend(daily, events):
     )
 
 
-    # -----------------------------
-    # Plot
-    # -----------------------------
-
 
     fig, ax = plt.subplots(
-        figsize=(10,4)
+        figsize=(9,4)
     )
 
 
@@ -456,40 +510,9 @@ def plot_ar_trend(daily, events):
     )
 
 
-    ax.set_xlabel(
-        "Year"
-    )
-
-
-    ax.set_ylabel(
-        "AR active days"
-    )
-
-
-    ax.set_title(
-        "Annual Atmospheric River Activity"
-    )
-
-
-    ax.grid(
-        True
-    )
-
-
-    st.pyplot(
-        fig
-    )
-
-
-    # -----------------------------
-    # Trend statistics
-    # -----------------------------
-
+    # Linear trend
 
     if len(annual) > 2:
-
-
-        import numpy as np
 
 
         slope, intercept = np.polyfit(
@@ -503,135 +526,31 @@ def plot_ar_trend(daily, events):
         )
 
 
+        trend = (
+
+            slope *
+            annual["year"]
+            +
+            intercept
+
+        )
+
+
+        ax.plot(
+
+            annual["year"],
+
+            trend
+
+        )
+
+
         st.info(
 
             f"Linear trend: {slope:.3f} AR days/year"
 
         )
-    # --------------------------------------------------------
-    # Prepare daily catalogue
-    # --------------------------------------------------------
 
-    if daily.empty:
-
-        st.warning(
-            "No daily catalogue available "
-            "for trend analysis."
-        )
-
-        return
-
-
-    daily = daily.copy()
-
-
-    # Ensure datetime
-
-    daily["date"] = pd.to_datetime(
-        daily["date"]
-    )
-
-
-    daily["year"] = (
-        daily["date"]
-        .dt
-        .year
-    )
-
-
-    # --------------------------------------------------------
-    # Detect AR activity variable
-    # --------------------------------------------------------
-
-    ar_candidates = [
-
-        "GW15_AR",
-
-        "AR_active",
-
-        "AR_activity",
-
-        "AR",
-
-        "n_AR_6h",
-
-    ]
-
-
-    ar_column = None
-
-
-    for col in ar_candidates:
-
-        if col in daily.columns:
-
-            ar_column = col
-
-            break
-
-
-
-    if ar_column is None:
-
-        st.error(
-            """
-            Atmospheric River activity column
-            was not detected in the daily catalogue.
-            """
-        )
-
-
-        st.write(
-            "Available columns:"
-        )
-
-        st.write(
-            list(
-                daily.columns
-            )
-        )
-
-        return
-
-
-
-    # ========================================================
-    # 1. Annual AR Active Days
-    # ========================================================
-
-
-    st.markdown(
-        "### Annual AR Activity"
-    )
-
-
-    annual_activity = (
-
-        daily
-
-        .groupby("year")[ar_column]
-
-        .sum()
-
-        .reset_index()
-
-    )
-
-
-    fig, ax = plt.subplots(
-        figsize=(9,4)
-    )
-
-
-    ax.plot(
-
-        annual_activity["year"],
-
-        annual_activity[ar_column],
-
-        marker="o",
-
-    )
 
 
     ax.set_xlabel(
@@ -662,91 +581,92 @@ def plot_ar_trend(daily, events):
 
 
     # ========================================================
-    # 2. Annual Event Frequency
+    # 2. Annual AR Event Frequency
     # ========================================================
 
 
     if events is not None and not events.empty:
 
 
-        st.markdown(
-            "### Annual AR Event Frequency"
-        )
+        if "start" in events.columns:
 
 
-        events = events.copy()
-
-
-        events["start"] = pd.to_datetime(
-            events["start"]
-        )
-
-
-        events["year"] = (
-
-            events["start"]
-
-            .dt
-
-            .year
-
-        )
-
-
-        annual_events = (
-
-            events
-
-            .groupby("year")
-
-            .size()
-
-            .reset_index(
-                name="events"
+            st.markdown(
+                "### Annual AR Event Frequency"
             )
 
-        )
+
+            events = events.copy()
+
+
+            events["start"] = pd.to_datetime(
+                events["start"]
+            )
+
+
+            events["year"] = (
+
+                events["start"]
+                .dt
+                .year
+
+            )
+
+
+            annual_events = (
+
+                events
+
+                .groupby("year")
+
+                .size()
+
+                .reset_index(
+                    name="events"
+                )
+
+            )
 
 
 
-        fig, ax = plt.subplots(
-            figsize=(9,4)
-        )
+            fig, ax = plt.subplots(
+                figsize=(9,4)
+            )
 
 
-        ax.bar(
+            ax.bar(
 
-            annual_events["year"],
+                annual_events["year"],
 
-            annual_events["events"],
+                annual_events["events"]
 
-        )
-
-
-        ax.set_xlabel(
-            "Year"
-        )
+            )
 
 
-        ax.set_ylabel(
-            "Number of events"
-        )
+            ax.set_xlabel(
+                "Year"
+            )
 
 
-        ax.set_title(
-            "Annual AR Event Count"
-        )
+            ax.set_ylabel(
+                "Number of AR events"
+            )
 
 
-        ax.grid(
-            True
-        )
+            ax.set_title(
+                "Annual AR Event Count"
+            )
 
 
-        st.pyplot(
-            fig,
-            use_container_width=True
-        )
+            ax.grid(
+                True
+            )
+
+
+            st.pyplot(
+                fig,
+                use_container_width=True
+            )
 
 
 
@@ -755,11 +675,13 @@ def plot_ar_trend(daily, events):
     # ========================================================
 
 
-    ivt_columns = [
+    ivt_candidates = [
 
         "peak_ivt",
 
-        "shab_peak_ivt",
+        "max_ivt",
+
+        "shab_peak_ivt"
 
     ]
 
@@ -767,7 +689,7 @@ def plot_ar_trend(daily, events):
     ivt_column = None
 
 
-    for col in ivt_columns:
+    for col in ivt_candidates:
 
         if col in daily.columns:
 
@@ -798,7 +720,6 @@ def plot_ar_trend(daily, events):
         )
 
 
-
         fig, ax = plt.subplots(
             figsize=(9,4)
         )
@@ -810,7 +731,7 @@ def plot_ar_trend(daily, events):
 
             annual_ivt[ivt_column],
 
-            marker="o",
+            marker="o"
 
         )
 
@@ -863,7 +784,8 @@ def plot_ar_trend(daily, events):
     )
 
 
-    monthly_activity = (
+
+    seasonal = (
 
         daily
 
@@ -884,9 +806,9 @@ def plot_ar_trend(daily, events):
 
     ax.bar(
 
-        monthly_activity["month"],
+        seasonal["month"],
 
-        monthly_activity[ar_column],
+        seasonal[ar_column]
 
     )
 
