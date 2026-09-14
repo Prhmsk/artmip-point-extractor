@@ -48,7 +48,9 @@ def _format_workbook(
     sheets: dict[str, pd.DataFrame]
 ) -> None:
 
+
     workbook = writer.book
+
 
     header = workbook.add_format(
         {
@@ -58,25 +60,28 @@ def _format_workbook(
         }
     )
 
+
     date_fmt = workbook.add_format(
         {
-            "num_format": "yyyy-mm-dd hh:mm"
+            "num_format":
+            "yyyy-mm-dd hh:mm"
         }
     )
 
+
     day_fmt = workbook.add_format(
         {
-            "num_format": "yyyy-mm-dd"
+            "num_format":
+            "yyyy-mm-dd"
         }
     )
 
 
     for sheet_name, df in sheets.items():
 
+
         sheet_name = sheet_name[:31]
 
-        if sheet_name not in writer.sheets:
-            continue
 
         ws = writer.sheets[sheet_name]
 
@@ -87,118 +92,166 @@ def _format_workbook(
         )
 
 
-        if len(df.columns) > 0:
+        if len(df.columns)>0:
 
             ws.autofilter(
+
                 0,
                 0,
-                max(len(df), 1),
+                max(len(df),1),
                 len(df.columns)-1
+
             )
 
 
-        for col_idx, col in enumerate(df.columns):
+
+        for col_idx,col in enumerate(df.columns):
+
 
             ws.write(
+
                 0,
                 col_idx,
-                col,
+                str(col),
                 header
+
             )
 
 
-            width = min(
-                max(
-                    len(str(col))+2,
-                    12
-                ),
-                36
+            width = max(
+
+                len(str(col))+2,
+
+                12
+
             )
 
 
-            if len(df) > 0:
+            if len(df)>0:
+
 
                 try:
 
+
                     sample = (
+
                         df[col]
-                        .astype("string")
-                        .fillna("")
+
+                        .astype(str)
+
+                        .replace(
+                            "nan",
+                            ""
+                        )
+
                         .head(300)
+
                     )
+
 
                     max_len = int(
-                        sample
-                        .str.len()
+
+                        sample.str.len()
                         .max()
+
                     )
 
-                    width = min(
-                        max(
-                            width,
-                            max_len+2
-                        ),
-                        36
+
+                    width=max(
+
+                        width,
+
+                        max_len+2
+
                     )
+
 
                 except Exception:
 
                     pass
 
 
+
             ws.set_column(
+
                 col_idx,
+
                 col_idx,
-                width
+
+                min(width,36)
+
             )
 
+
+
+        # Date formatting
 
         if "time" in df.columns:
 
-            idx = df.columns.get_loc(
+
+            idx=df.columns.get_loc(
                 "time"
             )
 
+
             ws.set_column(
+
                 idx,
+
                 idx,
+
                 20,
+
                 date_fmt
+
             )
+
 
 
         if "date" in df.columns:
 
-            idx = df.columns.get_loc(
+
+            idx=df.columns.get_loc(
                 "date"
             )
 
+
             ws.set_column(
+
                 idx,
+
                 idx,
+
                 14,
+
                 day_fmt
+
             )
 
 
-        for field in [
-            "start",
-            "end"
-        ]:
+
+        for field in ["start","end"]:
+
 
             if field in df.columns:
 
-                idx = df.columns.get_loc(
+
+                idx=df.columns.get_loc(
                     field
                 )
 
-                ws.set_column(
-                    idx,
-                    idx,
-                    20,
-                    date_fmt
-                )
 
+                ws.set_column(
+
+                    idx,
+
+                    idx,
+
+                    20,
+
+                    date_fmt
+
+                )
 
 # ============================================================
 # SINGLE LOCATION EXCEL
