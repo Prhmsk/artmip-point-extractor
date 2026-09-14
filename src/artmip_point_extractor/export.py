@@ -6,7 +6,6 @@ from zipfile import ZIP_DEFLATED, ZipFile
 import pandas as pd
 
 
-
 # ============================================================
 # CSV EXPORT
 # ============================================================
@@ -15,14 +14,14 @@ def dataframe_to_csv_bytes(
     df: pd.DataFrame
 ) -> bytes:
 
-    return df.to_csv(
-        index=False
-    ).encode("utf-8")
-
+    return (
+        df.to_csv(index=False)
+        .encode("utf-8")
+    )
 
 
 # ============================================================
-# WRITE EXCEL SHEET
+# WRITE SHEET
 # ============================================================
 
 def _write_df_sheet(
@@ -30,8 +29,6 @@ def _write_df_sheet(
     df: pd.DataFrame,
     sheet_name: str
 ) -> None:
-
-    # Excel limit = 31 characters
 
     sheet_name = sheet_name[:31]
 
@@ -42,12 +39,11 @@ def _write_df_sheet(
     )
 
 
-
 # ============================================================
-# FORMAT EXCEL WORKBOOK
+# FORMAT WORKBOOK
 # ============================================================
 
-ddef _format_workbook(
+def _format_workbook(
     writer: pd.ExcelWriter,
     sheets: dict[str, pd.DataFrame]
 ) -> None:
@@ -59,7 +55,6 @@ ddef _format_workbook(
             "bold": True,
             "font_color": "white",
             "bg_color": "#176B87",
-            "border": 0,
         }
     )
 
@@ -80,30 +75,27 @@ ddef _format_workbook(
 
         sheet_name = sheet_name[:31]
 
+        if sheet_name not in writer.sheets:
+            continue
+
         ws = writer.sheets[sheet_name]
 
 
-        # Freeze header
         ws.freeze_panes(
             1,
             0
         )
 
 
-        # Filter
         if len(df.columns) > 0:
 
             ws.autofilter(
                 0,
                 0,
-                max(len(df),1),
+                max(len(df), 1),
                 len(df.columns)-1
             )
 
-
-        # -----------------------------
-        # Column formatting
-        # -----------------------------
 
         for col_idx, col in enumerate(df.columns):
 
@@ -115,7 +107,6 @@ ddef _format_workbook(
             )
 
 
-            # Default width
             width = min(
                 max(
                     len(str(col))+2,
@@ -129,7 +120,7 @@ ddef _format_workbook(
 
                 try:
 
-                    values = (
+                    sample = (
                         df[col]
                         .astype("string")
                         .fillna("")
@@ -137,7 +128,7 @@ ddef _format_workbook(
                     )
 
                     max_len = int(
-                        values
+                        sample
                         .str.len()
                         .max()
                     )
@@ -145,7 +136,7 @@ ddef _format_workbook(
                     width = min(
                         max(
                             width,
-                            max_len + 2
+                            max_len+2
                         ),
                         36
                     )
@@ -161,10 +152,6 @@ ddef _format_workbook(
                 width
             )
 
-
-        # -----------------------------
-        # Date columns
-        # -----------------------------
 
         if "time" in df.columns:
 
@@ -211,6 +198,8 @@ ddef _format_workbook(
                     20,
                     date_fmt
                 )
+
+
 # ============================================================
 # SINGLE LOCATION EXCEL
 # ============================================================
@@ -226,99 +215,79 @@ def build_excel_bytes(
     output = BytesIO()
 
 
-
     sheets = {
 
-
         "Metadata":
-        pd.DataFrame(
-            {
-                "Parameter":
-                list(metadata.keys()),
+            pd.DataFrame(
+                {
+                    "Parameter":
+                        list(metadata.keys()),
 
-                "Value":
-                list(metadata.values())
-            }
-        ),
-
+                    "Value":
+                        list(metadata.values())
+                }
+            ),
 
 
         "6-hourly":
-        sixhourly,
-
+            sixhourly,
 
 
         "Daily":
-        daily,
-
+            daily,
 
 
         "Events":
-        events,
-
+            events,
 
 
         "Summary":
-        pd.DataFrame(
 
-            [
-
+            pd.DataFrame(
                 [
-                    "Dataset",
-                    metadata.get("dataset")
+                    [
+                        "Dataset",
+                        metadata.get("dataset")
+                    ],
+                    [
+                        "Latitude",
+                        metadata.get("latitude")
+                    ],
+                    [
+                        "Longitude",
+                        metadata.get("longitude")
+                    ],
+                    [
+                        "Buffer",
+                        metadata.get("buffer_deg")
+                    ],
+                    [
+                        "Start year",
+                        metadata.get("start_year")
+                    ],
+                    [
+                        "End year",
+                        metadata.get("end_year")
+                    ],
+                    [
+                        "Active timesteps",
+                        metadata.get("active_timesteps")
+                    ],
+                    [
+                        "Active days",
+                        metadata.get("active_days")
+                    ],
+                    [
+                        "Events",
+                        metadata.get("event_count")
+                    ],
                 ],
-
-                [
-                    "Latitude",
-                    metadata.get("latitude")
-                ],
-
-                [
-                    "Longitude",
-                    metadata.get("longitude")
-                ],
-
-                [
-                    "Buffer (deg)",
-                    metadata.get("buffer_deg")
-                ],
-
-                [
-                    "Start year",
-                    metadata.get("start_year")
-                ],
-
-                [
-                    "End year",
-                    metadata.get("end_year")
-                ],
-
-                [
-                    "Active timesteps",
-                    metadata.get("active_timesteps")
-                ],
-
-                [
-                    "Active days",
-                    metadata.get("active_days")
-                ],
-
-                [
-                    "Events",
-                    metadata.get("event_count")
-                ],
-
-            ],
-
-            columns=[
-                "Metric",
-                "Value"
-            ]
-
-        ),
-
+                columns=[
+                    "Metric",
+                    "Value"
+                ]
+            )
     }
-
 
 
     with pd.ExcelWriter(
@@ -342,7 +311,6 @@ def build_excel_bytes(
         )
 
 
-
     return output.getvalue()
 
 
@@ -358,9 +326,9 @@ def build_batch_excel_bytes(
 
     output = BytesIO()
 
-
     summary_rows = []
 
+    all_sheets = {}
 
 
     with pd.ExcelWriter(
@@ -369,13 +337,7 @@ def build_batch_excel_bytes(
     ) as writer:
 
 
-
-        all_sheets = {}
-
-
-
         for item in results:
-
 
             name = str(
                 item["name"]
@@ -384,10 +346,9 @@ def build_batch_excel_bytes(
 
             safe = (
                 "".join(
-                    ch
-                    if ch.isalnum()
+                    c if c.isalnum()
                     else "_"
-                    for ch in name
+                    for c in name
                 )
                 .strip("_")
                 or
@@ -398,105 +359,46 @@ def build_batch_excel_bytes(
             prefix = safe[:18]
 
 
-
-            sixhourly = item["sixhourly"]
-
-            daily = item["daily"]
-
-            events = item["events"]
-
             meta = item["metadata"]
 
 
-
             summary_rows.append(
-
                 {
-
-                    "name":
-                    name,
-
-                    "latitude":
-                    meta.get(
-                        "latitude"
-                    ),
-
-                    "longitude":
-                    meta.get(
-                        "longitude"
-                    ),
-
-                    "active_timesteps":
-                    meta.get(
-                        "active_timesteps"
-                    ),
-
-                    "active_days":
-                    meta.get(
-                        "active_days"
-                    ),
-
-                    "event_count":
-                    meta.get(
-                        "event_count"
-                    ),
-
+                    "name": name,
+                    "latitude": meta.get("latitude"),
+                    "longitude": meta.get("longitude"),
+                    "active_timesteps": meta.get("active_timesteps",0),
+                    "active_days": meta.get("active_days",0),
+                    "event_count": meta.get("event_count",0),
                 }
-
             )
-
 
 
             sheets = {
 
-
                 f"{prefix}_6h":
-                sixhourly,
-
+                    item["sixhourly"],
 
                 f"{prefix}_daily":
-                daily,
-
+                    item["daily"],
 
                 f"{prefix}_events":
-                events,
+                    item["events"],
 
             }
 
 
+            for sheet, df in sheets.items():
 
-            for sheet_name, df in sheets.items():
-
-
-                candidate = sheet_name[:31]
-
-                i = 2
-
-
-                while candidate in writer.sheets:
-
-                    suffix = f"_{i}"
-
-                    candidate = (
-                        sheet_name[:31-len(suffix)]
-                        +
-                        suffix
-                    )
-
-                    i += 1
-
-
+                sheet = sheet[:31]
 
                 _write_df_sheet(
                     writer,
                     df,
-                    candidate
+                    sheet
                 )
 
-
-                all_sheets[
-                    candidate
-                ] = df
+                all_sheets[sheet] = df
 
 
 
@@ -505,24 +407,20 @@ def build_batch_excel_bytes(
         )
 
 
-        summary_df.to_excel(
+        _write_df_sheet(
             writer,
-            sheet_name="Batch_Summary",
-            index=False
+            summary_df,
+            "Batch_Summary"
         )
 
 
-        all_sheets[
-            "Batch_Summary"
-        ] = summary_df
-
+        all_sheets["Batch_Summary"] = summary_df
 
 
         _format_workbook(
             writer,
             all_sheets
         )
-
 
 
     return output.getvalue()
@@ -548,33 +446,22 @@ def build_batch_zip_bytes(
     ) as archive:
 
 
-
         archive.writestr(
-
             "batch_summary.xlsx",
-
-            build_batch_excel_bytes(
-                results
-            )
-
+            build_batch_excel_bytes(results)
         )
-
 
 
         for item in results:
 
-
-            name = str(
-                item["name"]
-            )
+            name = str(item["name"])
 
 
             safe = (
                 "".join(
-                    ch
-                    if ch.isalnum()
+                    c if c.isalnum()
                     else "_"
-                    for ch in name
+                    for c in name
                 )
                 .strip("_")
                 or
@@ -582,71 +469,28 @@ def build_batch_zip_bytes(
             )
 
 
-
             archive.writestr(
-
                 f"{safe}_6hourly.csv",
-
                 dataframe_to_csv_bytes(
                     item["sixhourly"]
                 )
-
             )
 
 
-
             archive.writestr(
-
                 f"{safe}_daily.csv",
-
                 dataframe_to_csv_bytes(
                     item["daily"]
                 )
-
             )
 
 
-
             archive.writestr(
-
                 f"{safe}_events.csv",
-
                 dataframe_to_csv_bytes(
                     item["events"]
                 )
-
             )
-
-
-
-            archive.writestr(
-
-                f"{safe}_metadata.csv",
-
-                dataframe_to_csv_bytes(
-
-                    pd.DataFrame(
-
-                        {
-
-                            "Parameter":
-                            list(
-                                item["metadata"].keys()
-                            ),
-
-                            "Value":
-                            list(
-                                item["metadata"].values()
-                            ),
-
-                        }
-
-                    )
-
-                )
-
-            )
-
 
 
     return output.getvalue()
