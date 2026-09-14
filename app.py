@@ -41,19 +41,55 @@ st.set_page_config(
 # HEADER
 # ============================================================
 
-st.title("🌊 ARTMIP Point-Based Atmospheric River Extractor")
 
-st.markdown(
-    """
-    **A research-oriented tool for extracting location-based
-    Atmospheric River (AR) activity from ARTMIP catalogues.**
-
-    The application supports both **single-location** and **batch**
-    extraction and generates **selected-interval, daily, and
-    location-specific AR event catalogues** in Excel and CSV formats.
-    """
+logo_col1, title_col, logo_col2 = st.columns(
+    [1, 5, 1],
+    vertical_alignment="center",
 )
 
+with logo_col1:
+    st.image(
+        "assets/university_tabriz_logo.png",
+        width=120,
+    )
+
+with title_col:
+    st.markdown(
+        """
+        <div style="text-align: center;">
+
+        <h1 style="margin-bottom: 0;">
+        🌊 ARTMIP Point-Based Atmospheric River Extractor
+        </h1>
+
+        <p style="font-size: 1.05rem; margin-top: 8px;">
+        A research-oriented Streamlit application for extracting
+        location-based Atmospheric River (AR) activity from ARTMIP catalogues.
+        </p>
+
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+with logo_col2:
+    st.image(
+        "assets/shaoxing_university_logo.png",
+        width=120,
+    )
+    
+    st.markdown(
+    """
+    <div style="text-align: center; color: #666;">
+
+    <b>Center of Excellence in Hydroinformatics</b><br>
+    Faculty of Civil Engineering, University of Tabriz<br>
+    <b>Shaoxing University, China</b>
+
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 # ============================================================
 # HOW IT WORKS
@@ -133,26 +169,23 @@ with st.expander("👥 Developers & Affiliations", expanded=False):
         This application was developed as a collaborative research
         initiative in hydrology, hydroinformatics, and climate science.
 
-        **Professor Vahid Nourani,** *Professor of Civil and Environmental Engineering, University of Tabriz , Near East University*
+        **Alireza Shekaari,** 
+        *PhD Candidate in Civil and Environmental Engineering*
 
-        **Professor Chunwei Zhang,** *Professor of Structural Engineering, Shenyang University of Technology*
+        **Professor Vahid Nourani,** 
+        *Professor of Civil and Environmental Engineering, University of Tabriz , Near East University*
 
-        **Professor Abdorreza Vaezihir,** *Professor of Hydrogeology, University of Tabriz*
+        **Professor Chunwei Zhang,** 
+        *Professor of Structural Engineering, Shenyang University of Technology*
 
-        **Dr. Elnaz Sharghi,** *Associate Professor of Civil Engineering, University of Tabriz*
-
-        **Alireza Shekaari,** *PhD Candidate in Civil and Environmental Engineering*
-
+    
         ### Institutional Affiliations
 
-        **Center of Excellence in Hydroinformatics,** *Faculty of Civil Engineering  
+        **Center of Excellence in Hydroinformatics** *Faculty of Civil Engineering  
         University of Tabriz, Iran*
 
-        **Shenyang University of Technology,** *China*
+        **Shaoxing University** *China*
 
-        **Disaster Prevention Research Institute (DPRI),** *Kyoto University, Japan*
-
-        **Near East University,** *cyprus*
 
         ### Research Areas
 
