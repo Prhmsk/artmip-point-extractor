@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+import matplotlib.pyplot as plt
+import numpy as np
 
 APP_ROOT = Path(__file__).resolve().parent
 SRC_ROOT = APP_ROOT / "src"
@@ -328,12 +330,335 @@ with st.sidebar:
         "(hourly source tags, sampled at the selected interval)."
     )
 
+# ============================================================
+# TREND ANALYSIS MODULE
+# ============================================================
 
+def plot_ar_trend(daily, events):
+    """
+    Generate temporal trend plots for extracted AR catalogues.
+
+    Parameters
+    ----------
+    daily : pandas.DataFrame
+        Daily AR catalogue containing:
+        date, GW15_AR
+
+    events : pandas.DataFrame
+        Event catalogue containing:
+        start, event_id, peak_ivt, duration_h
+
+    """
+
+    st.markdown(
+        "## 📈 Temporal Trend Analysis"
+    )
+
+
+    # ========================================================
+    # 1. Annual AR active days
+    # ========================================================
+
+    daily = daily.copy()
+
+    daily["date"] = pd.to_datetime(
+        daily["date"]
+    )
+
+    daily["year"] = (
+        daily["date"]
+        .dt.year
+    )
+
+
+    annual_days = (
+        daily
+        .groupby("year")
+        ["GW15_AR"]
+        .sum()
+        .reset_index()
+    )
+
+
+    fig, ax = plt.subplots(
+        figsize=(8, 4)
+    )
+
+    ax.plot(
+        annual_days["year"],
+        annual_days["GW15_AR"],
+        marker="o",
+    )
+
+
+    ax.set_xlabel(
+        "Year"
+    )
+
+    ax.set_ylabel(
+        "AR active days"
+    )
+
+    ax.set_title(
+        "Annual Atmospheric River Active Days"
+    )
+
+    ax.grid(
+        True
+    )
+
+    st.pyplot(
+        fig,
+        use_container_width=True
+    )
+
+    plt.close(fig)
+
+
+
+    # ========================================================
+    # 2. Annual AR event frequency
+    # ========================================================
+
+    if (
+        events is not None
+        and not events.empty
+    ):
+
+        events = events.copy()
+
+        events["start"] = (
+            pd.to_datetime(
+                events["start"]
+            )
+        )
+
+        events["year"] = (
+            events["start"]
+            .dt.year
+        )
+
+
+        annual_events = (
+            events
+            .groupby("year")
+            .size()
+            .reset_index(
+                name="events"
+            )
+        )
+
+
+        fig2, ax2 = plt.subplots(
+            figsize=(8, 4)
+        )
+
+
+        ax2.bar(
+            annual_events["year"],
+            annual_events["events"]
+        )
+
+
+        ax2.set_xlabel(
+            "Year"
+        )
+
+        ax2.set_ylabel(
+            "Number of AR events"
+        )
+
+
+        ax2.set_title(
+            "Annual Atmospheric River Event Frequency"
+        )
+
+
+        ax2.grid(
+            True
+        )
+
+
+        st.pyplot(
+            fig2,
+            use_container_width=True
+        )
+
+        plt.close(fig2)
+
+
+
+    # ========================================================
+    # 3. Annual peak IVT trend
+    # ========================================================
+
+    if (
+        events is not None
+        and not events.empty
+        and "peak_ivt" in events.columns
+    ):
+
+        annual_ivt = (
+            events
+            .groupby("year")
+            ["peak_ivt"]
+            .max()
+            .reset_index()
+        )
+
+
+        fig3, ax3 = plt.subplots(
+            figsize=(8, 4)
+        )
+
+
+        ax3.plot(
+            annual_ivt["year"],
+            annual_ivt["peak_ivt"],
+            marker="o",
+        )
+
+
+        ax3.set_xlabel(
+            "Year"
+        )
+
+        ax3.set_ylabel(
+            "Peak IVT (kg m⁻¹ s⁻¹)"
+        )
+
+
+        ax3.set_title(
+            "Annual Maximum Atmospheric River Intensity"
+        )
+
+
+        ax3.grid(
+            True
+        )
+
+
+        st.pyplot(
+            fig3,
+            use_container_width=True
+        )
+
+        plt.close(fig3)
+
+
+
+    # ========================================================
+    # 4. Seasonal distribution
+    # ========================================================
+
+
+    daily["month"] = (
+        daily["date"]
+        .dt.month
+    )
+
+
+    seasonal = (
+        daily
+        .groupby("month")
+        ["GW15_AR"]
+        .sum()
+        .reset_index()
+    )
+
+
+    fig4, ax4 = plt.subplots(
+        figsize=(8, 4)
+    )
+
+
+    ax4.bar(
+        seasonal["month"],
+        seasonal["GW15_AR"]
+    )
+
+
+    ax4.set_xlabel(
+        "Month"
+    )
+
+    ax4.set_ylabel(
+        "AR active days"
+    )
+
+
+    ax4.set_title(
+        "Seasonal Distribution of Atmospheric River Activity"
+    )
+
+
+    ax4.set_xticks(
+        range(1,13)
+    )
+
+
+    ax4.grid(
+        True
+    )
+
+
+    st.pyplot(
+        fig4,
+        use_container_width=True
+    )
+
+    plt.close(fig4)
+
+
+
+    # ========================================================
+    # Summary statistics
+    # ========================================================
+
+    st.markdown(
+        "### Trend Summary"
+    )
+
+
+    col1, col2, col3 = st.columns(3)
+
+
+    with col1:
+        st.metric(
+            "Total AR active days",
+            int(
+                daily["GW15_AR"]
+                .sum()
+            )
+        )
+
+
+    with col2:
+        if events is not None:
+            st.metric(
+                "Total AR events",
+                len(events)
+            )
+
+
+    with col3:
+        if (
+            events is not None
+            and "peak_ivt" in events.columns
+        ):
+            st.metric(
+                "Maximum peak IVT",
+                f"{events['peak_ivt'].max():.1f}"
+            )
 # ============================================================
 # SINGLE LOCATION MODE
 # ============================================================
 
 if mode == "Single location":
+
+    # --------------------------------------------------------
+    # SIDEBAR LOCATION SETTINGS
+    # --------------------------------------------------------
 
     with st.sidebar:
 
@@ -348,10 +673,11 @@ if mode == "Single location":
             format="%.4f",
             help=(
                 "Latitude of the center of the location being analyzed. "
-                "Positive values represent the Northern Hemisphere; "
-                "negative values represent the Southern Hemisphere."
+                "Positive values represent Northern Hemisphere; "
+                "negative values represent Southern Hemisphere."
             ),
         )
+
 
         longitude = st.number_input(
             "Longitude",
@@ -367,6 +693,7 @@ if mode == "Single location":
             ),
         )
 
+
         buffer_deg = st.number_input(
             "Buffer (degrees)",
             min_value=0.05,
@@ -375,16 +702,17 @@ if mode == "Single location":
             step=0.05,
             format="%.2f",
             help=(
-                "Half-width of the square spatial analysis window around "
-                "the selected coordinates. For example, a 0.5° buffer "
-                "means ±0.5° in latitude and longitude."
+                "Half-width of the square spatial analysis window. "
+                "Example: 0.5° means ±0.5° around the selected point."
             ),
         )
 
+
         st.caption(
-            "Buffer defines the spatial analysis window used to identify "
-            "AR components intersecting the selected location."
+            "Buffer defines the spatial window used to identify "
+            "Atmospheric River components intersecting the location."
         )
+
 
         run = st.button(
             "🚀 Run extraction",
@@ -392,6 +720,427 @@ if mode == "Single location":
             use_container_width=True,
         )
 
+
+
+    # --------------------------------------------------------
+    # INITIAL PAGE
+    # --------------------------------------------------------
+
+    if (
+        "result" not in st.session_state
+        and not run
+    ):
+
+        st.info(
+            """
+            Enter the geographic coordinates and click
+            **Run extraction** to generate the Atmospheric River catalogue.
+            """
+        )
+
+        st.stop()
+
+
+
+    # --------------------------------------------------------
+    # RUN EXTRACTION
+    # --------------------------------------------------------
+
+    if run:
+
+
+        config = ExtractionConfig(
+
+            latitude=float(latitude),
+
+            longitude=float(longitude),
+
+            buffer_deg=float(buffer_deg),
+
+            start_year=int(start_year),
+
+            end_year=int(end_year),
+
+            min_pixels=int(min_pixels),
+
+            max_gap_hours=int(max_gap_hours),
+
+            min_timesteps=int(min_timesteps),
+
+            time_step_hours=int(time_step_hours),
+
+            spatial_padding_deg=float(
+                spatial_padding_deg
+            ),
+
+        )
+
+
+        cache_dir = Path(
+            ".artmip_cache"
+        )
+
+
+        progress = st.progress(
+            0,
+            text="Starting extraction..."
+        )
+
+
+        status = st.empty()
+
+
+
+        def update_progress(
+            value,
+            message
+        ):
+
+            progress.progress(
+                max(
+                    0,
+                    min(
+                        100,
+                        value
+                    )
+                ),
+                text=message,
+            )
+
+            status.caption(
+                message
+            )
+
+
+
+        try:
+
+            result = extract_catalogue(
+                dataset,
+                config,
+                cache_dir,
+                progress_callback=update_progress,
+            )
+
+
+            st.session_state[
+                "result"
+            ] = result
+
+
+            st.session_state[
+                "result_config"
+            ] = config
+
+
+            st.session_state[
+                "result_dataset"
+            ] = dataset.label
+
+
+
+        except Exception as exc:
+
+            progress.empty()
+
+            st.error(
+                f"Extraction failed: "
+                f"{type(exc).__name__}: {exc}"
+            )
+
+            st.stop()
+
+
+
+        progress.empty()
+
+        status.success(
+            "Extraction completed successfully."
+        )
+
+
+
+    # --------------------------------------------------------
+    # LOAD RESULTS
+    # --------------------------------------------------------
+
+    if "result" not in st.session_state:
+
+        st.stop()
+
+
+
+    sixhourly, daily, events, metadata = (
+        st.session_state["result"]
+    )
+
+
+
+    # --------------------------------------------------------
+    # SUMMARY METRICS
+    # --------------------------------------------------------
+
+    st.subheader(
+        "Results"
+    )
+
+
+    c1, c2, c3, c4 = st.columns(4)
+
+
+    c1.metric(
+        "Active timesteps",
+        f"{metadata['active_timesteps']:,}"
+    )
+
+
+    c2.metric(
+        "Active days",
+        f"{metadata['active_days']:,}"
+    )
+
+
+    c3.metric(
+        "Events",
+        f"{metadata['event_count']:,}"
+    )
+
+
+    c4.metric(
+        "Period",
+        (
+            f"{metadata['start_year']}"
+            "–"
+            f"{metadata['end_year']}"
+        )
+    )
+
+
+
+    st.divider()
+
+
+
+    # ========================================================
+    # RESULTS TABS
+    # ========================================================
+
+
+    tab1, tab2, tab3, tab4 = st.tabs(
+        [
+            "📈 Trends",
+            "🗺 Location & Metadata",
+            "📋 Catalogues",
+            "⬇ Download",
+        ]
+    )
+
+
+
+    # ========================================================
+    # TAB 1 - TREND
+    # ========================================================
+
+
+    with tab1:
+
+        plot_ar_trend(
+            daily.copy(),
+            events.copy()
+        )
+
+
+
+    # ========================================================
+    # TAB 2 - LOCATION
+    # ========================================================
+
+
+    with tab2:
+
+
+        left, right = st.columns(
+            [1.25, 1]
+        )
+
+
+        with left:
+
+            st.markdown(
+                "#### Location"
+            )
+
+
+            st.map(
+                pd.DataFrame(
+                    {
+                        "lat": [
+                            metadata["latitude"]
+                        ],
+
+                        "lon": [
+                            metadata["longitude"]
+                        ],
+                    }
+                ),
+
+                zoom=4,
+            )
+
+
+
+        with right:
+
+
+            st.markdown(
+                "#### Extraction metadata"
+            )
+
+
+            metadata_table = pd.DataFrame(
+                {
+                    "Parameter":
+                        list(metadata.keys()),
+
+                    "Value":
+                        list(metadata.values()),
+                }
+            )
+
+
+            st.dataframe(
+                metadata_table,
+
+                hide_index=True,
+
+                use_container_width=True,
+            )
+
+
+
+    # ========================================================
+    # TAB 3 - CATALOGUES
+    # ========================================================
+
+
+    with tab3:
+
+
+        st.markdown(
+            "#### Selected-interval catalogue"
+        )
+
+
+        st.dataframe(
+            sixhourly,
+
+            hide_index=True,
+
+            use_container_width=True,
+        )
+
+
+
+        st.markdown(
+            "#### Daily catalogue"
+        )
+
+
+        st.dataframe(
+            daily,
+
+            hide_index=True,
+
+            use_container_width=True,
+        )
+
+
+
+        st.markdown(
+            "#### Events"
+        )
+
+
+        st.dataframe(
+            events,
+
+            hide_index=True,
+
+            use_container_width=True,
+        )
+
+
+
+    # ========================================================
+    # TAB 4 - DOWNLOAD
+    # ========================================================
+
+
+    with tab4:
+
+
+        excel_bytes = build_excel_bytes(
+            sixhourly,
+            daily,
+            events,
+            metadata,
+        )
+
+
+        st.download_button(
+
+            label="📥 Download Excel workbook",
+
+            data=excel_bytes,
+
+            file_name=(
+                f"ARTMIP_"
+                f"{metadata['latitude']:.4f}_"
+                f"{metadata['longitude']:.4f}_"
+                f"{metadata['start_year']}_"
+                f"{metadata['end_year']}.xlsx"
+            ),
+
+            mime=(
+                "application/"
+                "vnd.openxmlformats-officedocument."
+                "spreadsheetml.sheet"
+            ),
+
+            use_container_width=True,
+        )
+
+
+        st.download_button(
+
+            label="📄 Download activity CSV",
+
+            data=dataframe_to_csv_bytes(
+                sixhourly
+            ),
+
+            file_name="ARTMIP_activity.csv",
+
+            mime="text/csv",
+
+            use_container_width=True,
+        )
+
+
+        st.download_button(
+
+            label="📄 Download events CSV",
+
+            data=dataframe_to_csv_bytes(
+                events
+            ),
+
+            file_name="ARTMIP_events.csv",
+
+            mime="text/csv",
+
+            use_container_width=True,
+        )
 
     # --------------------------------------------------------
     # Initial state
