@@ -41,135 +41,64 @@ st.set_page_config(
 # HEADER
 # ============================================================
 
+
+# Top row: institutional logos
+logo_left, spacer, logo_right = st.columns(
+    [1, 6, 1],
+    vertical_alignment="top",
+)
+
+with logo_left:
+    st.image(
+        "assets/university_tabriz_logo.png",
+        width=95,
+    )
+
+with logo_right:
+    st.image(
+        "assets/shaoxing_university_logo.png",
+        width=95,
+    )
+
+
+# Centered title and description
 st.markdown(
     """
-    <style>
+    <div style="text-align: center; margin-top: -55px;">
 
-    .institutional-header {
-        position: relative;
-        width: 100%;
-        padding-top: 10px;
-        padding-bottom: 20px;
-        min-height: 190px;
-    }
+        <h1 style="
+            font-size: 2.25rem;
+            margin-bottom: 0.5rem;
+        ">
+            🌊 ARTMIP Point-Based Atmospheric River Extractor
+        </h1>
 
-    .logo-left {
-        position: absolute;
-        top: 5px;
-        left: 5px;
-        width: 115px;
-        text-align: left;
-    }
+        <p style="
+            font-size: 1.05rem;
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+        ">
+            A research-oriented Streamlit application for extracting
+            location-based Atmospheric River (AR) activity from
+            ARTMIP catalogues.
+        </p>
 
-    .logo-right {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        width: 115px;
-        text-align: right;
-    }
-
-    .logo-left img,
-    .logo-right img {
-        max-width: 110px;
-        max-height: 110px;
-        object-fit: contain;
-    }
-
-    .header-center {
-        text-align: center;
-        padding-left: 130px;
-        padding-right: 130px;
-        padding-top: 15px;
-    }
-
-    .header-title {
-        font-size: 2.25rem;
-        font-weight: 700;
-        line-height: 1.15;
-        margin-bottom: 12px;
-    }
-
-    .header-description {
-        font-size: 1.05rem;
-        line-height: 1.5;
-        margin-bottom: 10px;
-    }
-
-    .header-affiliation {
-        font-size: 0.92rem;
-        line-height: 1.45;
-        color: #666;
-    }
-
-    @media (max-width: 768px) {
-
-        .institutional-header {
-            min-height: 250px;
-        }
-
-        .logo-left,
-        .logo-right {
-            width: 85px;
-        }
-
-        .logo-left img,
-        .logo-right img {
-            max-width: 80px;
-            max-height: 80px;
-        }
-
-        .header-center {
-            padding-left: 95px;
-            padding-right: 95px;
-        }
-
-        .header-title {
-            font-size: 1.55rem;
-        }
-
-        .header-description {
-            font-size: 0.9rem;
-        }
-
-    }
-
-    </style>
-
-    <div class="institutional-header">
-
-        <div class="logo-left">
-            <img src="assets/university_tabriz_logo.png">
-        </div>
-
-        <div class="logo-right">
-            <img src="assets/shaoxing_university_logo.png">
-        </div>
-
-        <div class="header-center">
-
-            <div class="header-title">
-                🌊 ARTMIP Point-Based Atmospheric River Extractor
-            </div>
-
-            <div class="header-description">
-                A research-oriented Streamlit application for extracting
-                location-based Atmospheric River (AR) activity from
-                ARTMIP catalogues.
-            </div>
-
-            <div class="header-affiliation">
-                <b>Center of Excellence in Hydroinformatics</b><br>
-                Faculty of Civil Engineering, University of Tabriz<br>
-                Shaoxing University, China
-            </div>
-
-        </div>
+        <p style="
+            font-size: 0.92rem;
+            color: #666;
+            line-height: 1.5;
+        ">
+            <b>Center of Excellence in Hydroinformatics</b><br>
+            Faculty of Civil Engineering, University of Tabriz<br>
+            Shaoxing University, China
+        </p>
 
     </div>
     """,
     unsafe_allow_html=True,
 )
+
+st.divider()
 
 
 
