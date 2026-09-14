@@ -335,18 +335,15 @@ with st.sidebar:
 # ATMOSPHERIC RIVER TREND PLOT
 # ============================================================
 
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-
-
 def plot_ar_trend(daily, events):
 
-    st.subheader("📈 Atmospheric River Temporal Trends")
+    st.subheader(
+        "📈 Atmospheric River Temporal Trends"
+    )
 
 
     # --------------------------------------------------------
-    # Check input
+    # Validate input
     # --------------------------------------------------------
 
     if daily is None or daily.empty:
@@ -363,45 +360,46 @@ def plot_ar_trend(daily, events):
 
 
     # --------------------------------------------------------
-    # Prepare dates
+    # Date preparation
     # --------------------------------------------------------
 
-    if "date" in daily.columns:
-
-        daily["date"] = pd.to_datetime(
-            daily["date"]
-        )
-
-    else:
+    if "date" not in daily.columns:
 
         st.error(
-            "Daily catalogue does not contain date column."
+            "Daily catalogue does not contain 'date' column."
         )
 
         return
 
 
+    daily["date"] = pd.to_datetime(
+        daily["date"]
+    )
 
-    if "year" not in daily.columns:
 
-        daily["year"] = (
-            daily["date"]
-            .dt
-            .year
-        )
+    daily["year"] = (
+        daily["date"]
+        .dt
+        .year
+    )
+
+
+    daily["month"] = (
+        daily["date"]
+        .dt
+        .month
+    )
 
 
 
     # --------------------------------------------------------
-    # Detect AR activity column
+    # Detect AR activity variable
     # --------------------------------------------------------
 
     ar_candidates = [
 
-        # Current ARTMIP output
         "ARTMIP_AR",
 
-        # Previous versions
         "GW15_AR",
 
         "AR_activity",
@@ -410,10 +408,7 @@ def plot_ar_trend(daily, events):
 
         "AR",
 
-        "is_AR",
-
-        # Alternative intensity variables
-        "n_AR_timesteps"
+        "is_AR"
 
     ]
 
@@ -426,71 +421,59 @@ def plot_ar_trend(daily, events):
         if col in daily.columns:
 
             ar_column = col
+
             break
 
 
 
     if ar_column is None:
 
-
         st.error(
-            "Atmospheric River activity column was not detected in the daily catalogue."
+            "Atmospheric River activity column was not detected."
         )
-
 
         st.write(
             "Available columns:"
         )
 
-
         st.write(
             list(daily.columns)
         )
-
 
         return
 
 
 
     st.success(
-        f"Detected AR activity variable: `{ar_column}`"
+        f"Detected AR variable: {ar_column}"
     )
 
 
 
     # ========================================================
-    # 1. Annual AR Activity Trend
+    # 1. Annual AR Days
     # ========================================================
 
 
     st.markdown(
-        "### Annual Atmospheric River Activity"
+        "### Annual AR Activity"
     )
 
 
     annual = (
 
         daily
-
         .groupby("year")[ar_column]
-
         .sum()
-
         .reset_index()
 
     )
 
 
-    annual.rename(
-
-        columns={
-            ar_column:
-            "AR_days"
-        },
-
-        inplace=True
-
-    )
+    annual.columns = [
+        "year",
+        "AR_days"
+    ]
 
 
 
@@ -500,55 +483,37 @@ def plot_ar_trend(daily, events):
 
 
     ax.plot(
-
         annual["year"],
-
         annual["AR_days"],
-
         marker="o"
-
     )
 
 
-    # Linear trend
-
     if len(annual) > 2:
 
-
         slope, intercept = np.polyfit(
-
             annual["year"],
-
             annual["AR_days"],
-
             1
-
         )
 
 
         trend = (
-
             slope *
             annual["year"]
             +
             intercept
-
         )
 
 
         ax.plot(
-
             annual["year"],
-
             trend
-
         )
 
 
         st.info(
-
             f"Linear trend: {slope:.3f} AR days/year"
-
         )
 
 
@@ -560,11 +525,6 @@ def plot_ar_trend(daily, events):
 
     ax.set_ylabel(
         "AR active days"
-    )
-
-
-    ax.set_title(
-        "Annual Atmospheric River Activity"
     )
 
 
@@ -581,141 +541,41 @@ def plot_ar_trend(daily, events):
 
 
     # ========================================================
-    # 2. Annual AR Event Frequency
+    # 2. Event Frequency
     # ========================================================
 
 
-    if events is not None and not events.empty:
-
-
-        if "start" in events.columns:
-
-
-            st.markdown(
-                "### Annual AR Event Frequency"
-            )
-
-
-            events = events.copy()
-
-
-            events["start"] = pd.to_datetime(
-                events["start"]
-            )
-
-
-            events["year"] = (
-
-                events["start"]
-                .dt
-                .year
-
-            )
-
-
-            annual_events = (
-
-                events
-
-                .groupby("year")
-
-                .size()
-
-                .reset_index(
-                    name="events"
-                )
-
-            )
-
-
-
-            fig, ax = plt.subplots(
-                figsize=(9,4)
-            )
-
-
-            ax.bar(
-
-                annual_events["year"],
-
-                annual_events["events"]
-
-            )
-
-
-            ax.set_xlabel(
-                "Year"
-            )
-
-
-            ax.set_ylabel(
-                "Number of AR events"
-            )
-
-
-            ax.set_title(
-                "Annual AR Event Count"
-            )
-
-
-            ax.grid(
-                True
-            )
-
-
-            st.pyplot(
-                fig,
-                use_container_width=True
-            )
-
-
-
-    # ========================================================
-    # 3. Maximum IVT Trend
-    # ========================================================
-
-
-    ivt_candidates = [
-
-        "peak_ivt",
-
-        "max_ivt",
-
-        "shab_peak_ivt"
-
-    ]
-
-
-    ivt_column = None
-
-
-    for col in ivt_candidates:
-
-        if col in daily.columns:
-
-            ivt_column = col
-
-            break
-
-
-
-    if ivt_column:
+    if (
+        events is not None
+        and not events.empty
+        and "start" in events.columns
+    ):
 
 
         st.markdown(
-            "### Annual Maximum IVT"
+            "### Annual AR Event Frequency"
         )
 
 
-        annual_ivt = (
+        ev = events.copy()
 
-            daily
 
-            .groupby("year")[ivt_column]
+        ev["start"] = pd.to_datetime(
+            ev["start"]
+        )
 
-            .max()
 
-            .reset_index()
+        annual_events = (
+
+            ev
+            .assign(
+                year=ev["start"].dt.year
+            )
+            .groupby("year")
+            .size()
+            .reset_index(
+                name="events"
+            )
 
         )
 
@@ -725,14 +585,9 @@ def plot_ar_trend(daily, events):
         )
 
 
-        ax.plot(
-
-            annual_ivt["year"],
-
-            annual_ivt[ivt_column],
-
-            marker="o"
-
+        ax.bar(
+            annual_events["year"],
+            annual_events["events"]
         )
 
 
@@ -742,12 +597,7 @@ def plot_ar_trend(daily, events):
 
 
         ax.set_ylabel(
-            "IVT (kg m⁻¹ s⁻¹)"
-        )
-
-
-        ax.set_title(
-            "Annual Maximum Atmospheric River Intensity"
+            "Number of events"
         )
 
 
@@ -764,7 +614,7 @@ def plot_ar_trend(daily, events):
 
 
     # ========================================================
-    # 4. Seasonal Distribution
+    # 3. Seasonal Cycle
     # ========================================================
 
 
@@ -773,30 +623,14 @@ def plot_ar_trend(daily, events):
     )
 
 
-    daily["month"] = (
-
-        daily["date"]
-
-        .dt
-
-        .month
-
-    )
-
-
-
     seasonal = (
 
         daily
-
         .groupby("month")[ar_column]
-
         .sum()
-
         .reset_index()
 
     )
-
 
 
     fig, ax = plt.subplots(
@@ -805,11 +639,8 @@ def plot_ar_trend(daily, events):
 
 
     ax.bar(
-
         seasonal["month"],
-
         seasonal[ar_column]
-
     )
 
 
@@ -820,11 +651,6 @@ def plot_ar_trend(daily, events):
 
     ax.set_ylabel(
         "AR activity"
-    )
-
-
-    ax.set_title(
-        "Seasonal Cycle of Atmospheric Rivers"
     )
 
 
@@ -842,46 +668,55 @@ def plot_ar_trend(daily, events):
         fig,
         use_container_width=True
     )
-    
+
+
+
     # ========================================================
-    # Summary statistics
+    # 4. Summary
     # ========================================================
+
 
     st.markdown(
         "### Trend Summary"
     )
 
 
-    col1, col2, col3 = st.columns(3)
+    c1, c2, c3 = st.columns(3)
 
 
-    with col1:
+    with c1:
+
         st.metric(
             "Total AR active days",
             int(
-                daily["GW15_AR"]
+                daily[ar_column]
                 .sum()
             )
         )
 
 
-    with col2:
+    with c2:
+
         if events is not None:
+
             st.metric(
                 "Total AR events",
                 len(events)
             )
 
 
-    with col3:
+    with c3:
+
         if (
             events is not None
             and "peak_ivt" in events.columns
         ):
+
             st.metric(
                 "Maximum peak IVT",
                 f"{events['peak_ivt'].max():.1f}"
             )
+
 # ============================================================
 # SINGLE LOCATION MODE
 # ============================================================
