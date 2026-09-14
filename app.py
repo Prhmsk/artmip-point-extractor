@@ -41,55 +41,137 @@ st.set_page_config(
 # HEADER
 # ============================================================
 
+st.markdown(
+    """
+    <style>
 
-logo_col1, title_col, logo_col2 = st.columns(
-    [1, 5, 1],
-    vertical_alignment="center",
-)
+    .institutional-header {
+        position: relative;
+        width: 100%;
+        padding-top: 10px;
+        padding-bottom: 20px;
+        min-height: 190px;
+    }
 
-with logo_col1:
-    st.image(
-        "assets/university_tabriz_logo.png",
-        width=120,
-    )
+    .logo-left {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        width: 115px;
+        text-align: left;
+    }
 
-with title_col:
-    st.markdown(
-        """
-        <div style="text-align: center;">
+    .logo-right {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 115px;
+        text-align: right;
+    }
 
-        <h1 style="margin-bottom: 0;">
-        🌊 ARTMIP Point-Based Atmospheric River Extractor
-        </h1>
+    .logo-left img,
+    .logo-right img {
+        max-width: 110px;
+        max-height: 110px;
+        object-fit: contain;
+    }
 
-        <p style="font-size: 1.05rem; margin-top: 8px;">
-        A research-oriented Streamlit application for extracting
-        location-based Atmospheric River (AR) activity from ARTMIP catalogues.
-        </p>
+    .header-center {
+        text-align: center;
+        padding-left: 130px;
+        padding-right: 130px;
+        padding-top: 15px;
+    }
+
+    .header-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        line-height: 1.15;
+        margin-bottom: 12px;
+    }
+
+    .header-description {
+        font-size: 1.05rem;
+        line-height: 1.5;
+        margin-bottom: 10px;
+    }
+
+    .header-affiliation {
+        font-size: 0.92rem;
+        line-height: 1.45;
+        color: #666;
+    }
+
+    @media (max-width: 768px) {
+
+        .institutional-header {
+            min-height: 250px;
+        }
+
+        .logo-left,
+        .logo-right {
+            width: 85px;
+        }
+
+        .logo-left img,
+        .logo-right img {
+            max-width: 80px;
+            max-height: 80px;
+        }
+
+        .header-center {
+            padding-left: 95px;
+            padding-right: 95px;
+        }
+
+        .header-title {
+            font-size: 1.55rem;
+        }
+
+        .header-description {
+            font-size: 0.9rem;
+        }
+
+    }
+
+    </style>
+
+    <div class="institutional-header">
+
+        <div class="logo-left">
+            <img src="assets/university_tabriz_logo.png">
+        </div>
+
+        <div class="logo-right">
+            <img src="assets/shaoxing_university_logo.png">
+        </div>
+
+        <div class="header-center">
+
+            <div class="header-title">
+                🌊 ARTMIP Point-Based Atmospheric River Extractor
+            </div>
+
+            <div class="header-description">
+                A research-oriented Streamlit application for extracting
+                location-based Atmospheric River (AR) activity from
+                ARTMIP catalogues.
+            </div>
+
+            <div class="header-affiliation">
+                <b>Center of Excellence in Hydroinformatics</b><br>
+                Faculty of Civil Engineering, University of Tabriz<br>
+                Shaoxing University, China
+            </div>
 
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-with logo_col2:
-    st.image(
-        "assets/shaoxing_university_logo.png",
-        width=120,
-    )
-    
-    st.markdown(
-    """
-    <div style="text-align: center; color: #666;">
-
-    <b>Center of Excellence in Hydroinformatics</b><br>
-    Faculty of Civil Engineering, University of Tabriz<br>
-    <b>Shaoxing University, China</b>
 
     </div>
     """,
     unsafe_allow_html=True,
 )
+
+
 
 # ============================================================
 # HOW IT WORKS
