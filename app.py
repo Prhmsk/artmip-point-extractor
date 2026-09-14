@@ -51,7 +51,7 @@ logo_left, _, logo_right = st.columns(
 with logo_left:
     st.image(
         "assets/university_tabriz_logo.png",
-        width=150,
+        width=120,
     )
 
 with logo_right:
