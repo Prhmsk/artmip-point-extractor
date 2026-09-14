@@ -47,14 +47,12 @@ def _write_df_sheet(
 # FORMAT EXCEL WORKBOOK
 # ============================================================
 
-def _format_workbook(
+ddef _format_workbook(
     writer: pd.ExcelWriter,
     sheets: dict[str, pd.DataFrame]
 ) -> None:
 
-
     workbook = writer.book
-
 
     header = workbook.add_format(
         {
@@ -65,55 +63,49 @@ def _format_workbook(
         }
     )
 
-
     date_fmt = workbook.add_format(
         {
-            "num_format":
-            "yyyy-mm-dd hh:mm"
+            "num_format": "yyyy-mm-dd hh:mm"
         }
     )
-
 
     day_fmt = workbook.add_format(
         {
-            "num_format":
-            "yyyy-mm-dd"
+            "num_format": "yyyy-mm-dd"
         }
     )
-
 
 
     for sheet_name, df in sheets.items():
 
+        sheet_name = sheet_name[:31]
 
-        ws = writer.sheets[
-            sheet_name[:31]
-        ]
+        ws = writer.sheets[sheet_name]
 
 
+        # Freeze header
         ws.freeze_panes(
             1,
             0
         )
 
 
-        if len(df.columns):
+        # Filter
+        if len(df.columns) > 0:
 
             ws.autofilter(
                 0,
                 0,
-                max(len(df), 1),
+                max(len(df),1),
                 len(df.columns)-1
             )
 
 
+        # -----------------------------
+        # Column formatting
+        # -----------------------------
 
-        for col_idx, col in enumerate(
-            df.columns
-        ):
-
-
-            # Header
+        for col_idx, col in enumerate(df.columns):
 
             ws.write(
                 0,
@@ -123,6 +115,7 @@ def _format_workbook(
             )
 
 
+            # Default width
             width = min(
                 max(
                     len(str(col))+2,
@@ -134,35 +127,32 @@ def _format_workbook(
 
             if len(df) > 0:
 
+                try:
 
-                # FIX:
-                # Convert everything to string
-                # before calculating length
-
-                sample = (
-                    df[col]
-                    .astype(str)
-                    .head(300)
-                )
-
-
-                if not sample.empty:
+                    values = (
+                        df[col]
+                        .astype("string")
+                        .fillna("")
+                        .head(300)
+                    )
 
                     max_len = int(
-                        sample
-                        .map(
-                            len
-                        )
+                        values
+                        .str.len()
                         .max()
                     )
 
                     width = min(
                         max(
                             width,
-                            max_len+2
+                            max_len + 2
                         ),
                         36
                     )
+
+                except Exception:
+
+                    pass
 
 
             ws.set_column(
@@ -172,8 +162,9 @@ def _format_workbook(
             )
 
 
-
+        # -----------------------------
         # Date columns
+        # -----------------------------
 
         if "time" in df.columns:
 
@@ -220,9 +211,6 @@ def _format_workbook(
                     20,
                     date_fmt
                 )
-
-
-
 # ============================================================
 # SINGLE LOCATION EXCEL
 # ============================================================
