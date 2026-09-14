@@ -87,7 +87,7 @@ An optional `name` column is recommended. Example:
 
 ```csv
 name,latitude,longitude
-Shabestar,38.1922,45.6339
+Tabriz,38.08,46.29
 Tokyo,35.6762,139.6503
 Sydney,-33.8688,151.2093
 ```
