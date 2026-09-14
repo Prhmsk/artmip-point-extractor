@@ -165,13 +165,13 @@ with st.expander("👥 Developers & Affiliations", expanded=False):
         initiative in hydrology, hydroinformatics, and climate science.
 
         **Alireza Shekaari,** 
-        *PhD Candidate in Civil and Environmental Engineering*
+        PhD Candidate in Civil Engineering
 
         **Professor Vahid Nourani,** 
-        *Professor of Civil and Environmental Engineering, University of Tabriz , Near East University*
+        Professor of Civil Engineering
 
         **Professor Chunwei Zhang,** 
-        *Professor of Structural Engineering, Shenyang University of Technology*
+        Professor of Civil Engineering
 
     
         ### Institutional Affiliations
