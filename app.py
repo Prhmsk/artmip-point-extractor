@@ -42,8 +42,8 @@ st.set_page_config(
 # ============================================================
 
 
-# Top row: institutional logos
-logo_left, spacer, logo_right = st.columns(
+# Logos at the top corners
+logo_left, _, logo_right = st.columns(
     [1, 6, 1],
     vertical_alignment="top",
 )
@@ -61,45 +61,27 @@ with logo_right:
     )
 
 
-# Centered title and description
+# Centered title
+st.title(
+    "🌊 ARTMIP Point-Based Atmospheric River Extractor"
+)
+
+# Description
+st.caption(
+    "A research-oriented Streamlit application for extracting "
+    "location-based Atmospheric River (AR) activity from ARTMIP catalogues."
+)
+
+# Affiliations
 st.markdown(
     """
-    <div style="text-align: center; margin-top: -55px;">
-
-        <h1 style="
-            font-size: 2.25rem;
-            margin-bottom: 0.5rem;
-        ">
-            🌊 ARTMIP Point-Based Atmospheric River Extractor
-        </h1>
-
-        <p style="
-            font-size: 1.05rem;
-            line-height: 1.5;
-            margin-bottom: 0.5rem;
-        ">
-            A research-oriented Streamlit application for extracting
-            location-based Atmospheric River (AR) activity from
-            ARTMIP catalogues.
-        </p>
-
-        <p style="
-            font-size: 0.92rem;
-            color: #666;
-            line-height: 1.5;
-        ">
-            <b>Center of Excellence in Hydroinformatics</b><br>
-            Faculty of Civil Engineering, University of Tabriz<br>
-            Shaoxing University, China
-        </p>
-
-    </div>
-    """,
-    unsafe_allow_html=True,
+    **Center of Excellence in Hydroinformatics**  
+    Faculty of Civil Engineering, University of Tabriz  
+    Shaoxing University, China
+    """
 )
 
 st.divider()
-
 
 
 # ============================================================
