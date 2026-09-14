@@ -75,9 +75,8 @@ st.caption(
 # Affiliations
 st.markdown(
     """
-    **Center of Excellence in Hydroinformatics**  
-    Faculty of Civil Engineering, University of Tabriz  
-    **Shaoxing University**
+    **Center of Excellence in Hydroinformatics,** Faculty of Civil Engineering, University of Tabriz  
+    **Shaoxing University,**
     China
     """
 )
