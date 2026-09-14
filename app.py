@@ -331,63 +331,142 @@ with st.sidebar:
     )
 
 # ============================================================
-# TREND ANALYSIS MODULE
+# ATMOSPHERIC RIVER TREND ANALYSIS
 # ============================================================
 
 def plot_ar_trend(daily, events):
-    """
-    Generate temporal trend plots for extracted AR catalogues.
 
-    Parameters
-    ----------
-    daily : pandas.DataFrame
-        Daily AR catalogue containing:
-        date, GW15_AR
+    import matplotlib.pyplot as plt
 
-    events : pandas.DataFrame
-        Event catalogue containing:
-        start, event_id, peak_ivt, duration_h
 
-    """
-
-    st.markdown(
-        "## 📈 Temporal Trend Analysis"
+    st.subheader(
+        "📈 Atmospheric River Temporal Trends"
     )
 
 
-    # ========================================================
-    # 1. Annual AR active days
-    # ========================================================
+    # --------------------------------------------------------
+    # Prepare daily catalogue
+    # --------------------------------------------------------
+
+    if daily.empty:
+
+        st.warning(
+            "No daily catalogue available "
+            "for trend analysis."
+        )
+
+        return
+
 
     daily = daily.copy()
+
+
+    # Ensure datetime
 
     daily["date"] = pd.to_datetime(
         daily["date"]
     )
 
+
     daily["year"] = (
         daily["date"]
-        .dt.year
+        .dt
+        .year
     )
 
 
-    annual_days = (
+    # --------------------------------------------------------
+    # Detect AR activity variable
+    # --------------------------------------------------------
+
+    ar_candidates = [
+
+        "GW15_AR",
+
+        "AR_active",
+
+        "AR_activity",
+
+        "AR",
+
+        "n_AR_6h",
+
+    ]
+
+
+    ar_column = None
+
+
+    for col in ar_candidates:
+
+        if col in daily.columns:
+
+            ar_column = col
+
+            break
+
+
+
+    if ar_column is None:
+
+        st.error(
+            """
+            Atmospheric River activity column
+            was not detected in the daily catalogue.
+            """
+        )
+
+
+        st.write(
+            "Available columns:"
+        )
+
+        st.write(
+            list(
+                daily.columns
+            )
+        )
+
+        return
+
+
+
+    # ========================================================
+    # 1. Annual AR Active Days
+    # ========================================================
+
+
+    st.markdown(
+        "### Annual AR Activity"
+    )
+
+
+    annual_activity = (
+
         daily
-        .groupby("year")
-        ["GW15_AR"]
+
+        .groupby("year")[ar_column]
+
         .sum()
+
         .reset_index()
+
     )
 
 
     fig, ax = plt.subplots(
-        figsize=(8, 4)
+        figsize=(9,4)
     )
 
+
     ax.plot(
-        annual_days["year"],
-        annual_days["GW15_AR"],
+
+        annual_activity["year"],
+
+        annual_activity[ar_column],
+
         marker="o",
+
     )
 
 
@@ -395,222 +474,289 @@ def plot_ar_trend(daily, events):
         "Year"
     )
 
+
     ax.set_ylabel(
         "AR active days"
     )
 
+
     ax.set_title(
-        "Annual Atmospheric River Active Days"
+        "Annual Atmospheric River Activity"
     )
+
 
     ax.grid(
         True
     )
+
 
     st.pyplot(
         fig,
         use_container_width=True
     )
 
-    plt.close(fig)
-
 
 
     # ========================================================
-    # 2. Annual AR event frequency
+    # 2. Annual Event Frequency
     # ========================================================
 
-    if (
-        events is not None
-        and not events.empty
-    ):
+
+    if events is not None and not events.empty:
+
+
+        st.markdown(
+            "### Annual AR Event Frequency"
+        )
+
 
         events = events.copy()
 
-        events["start"] = (
-            pd.to_datetime(
-                events["start"]
-            )
+
+        events["start"] = pd.to_datetime(
+            events["start"]
         )
 
+
         events["year"] = (
+
             events["start"]
-            .dt.year
+
+            .dt
+
+            .year
+
         )
 
 
         annual_events = (
+
             events
+
             .groupby("year")
+
             .size()
+
             .reset_index(
                 name="events"
             )
+
         )
 
 
-        fig2, ax2 = plt.subplots(
-            figsize=(8, 4)
+
+        fig, ax = plt.subplots(
+            figsize=(9,4)
         )
 
 
-        ax2.bar(
+        ax.bar(
+
             annual_events["year"],
-            annual_events["events"]
+
+            annual_events["events"],
+
         )
 
 
-        ax2.set_xlabel(
+        ax.set_xlabel(
             "Year"
         )
 
-        ax2.set_ylabel(
-            "Number of AR events"
+
+        ax.set_ylabel(
+            "Number of events"
         )
 
 
-        ax2.set_title(
-            "Annual Atmospheric River Event Frequency"
+        ax.set_title(
+            "Annual AR Event Count"
         )
 
 
-        ax2.grid(
+        ax.grid(
             True
         )
 
 
         st.pyplot(
-            fig2,
+            fig,
             use_container_width=True
         )
 
-        plt.close(fig2)
-
 
 
     # ========================================================
-    # 3. Annual peak IVT trend
+    # 3. Maximum IVT Trend
     # ========================================================
 
-    if (
-        events is not None
-        and not events.empty
-        and "peak_ivt" in events.columns
-    ):
+
+    ivt_columns = [
+
+        "peak_ivt",
+
+        "shab_peak_ivt",
+
+    ]
+
+
+    ivt_column = None
+
+
+    for col in ivt_columns:
+
+        if col in daily.columns:
+
+            ivt_column = col
+
+            break
+
+
+
+    if ivt_column:
+
+
+        st.markdown(
+            "### Annual Maximum IVT"
+        )
+
 
         annual_ivt = (
-            events
-            .groupby("year")
-            ["peak_ivt"]
+
+            daily
+
+            .groupby("year")[ivt_column]
+
             .max()
+
             .reset_index()
+
         )
 
 
-        fig3, ax3 = plt.subplots(
-            figsize=(8, 4)
+
+        fig, ax = plt.subplots(
+            figsize=(9,4)
         )
 
 
-        ax3.plot(
+        ax.plot(
+
             annual_ivt["year"],
-            annual_ivt["peak_ivt"],
+
+            annual_ivt[ivt_column],
+
             marker="o",
+
         )
 
 
-        ax3.set_xlabel(
+        ax.set_xlabel(
             "Year"
         )
 
-        ax3.set_ylabel(
-            "Peak IVT (kg m⁻¹ s⁻¹)"
+
+        ax.set_ylabel(
+            "IVT (kg m⁻¹ s⁻¹)"
         )
 
 
-        ax3.set_title(
+        ax.set_title(
             "Annual Maximum Atmospheric River Intensity"
         )
 
 
-        ax3.grid(
+        ax.grid(
             True
         )
 
 
         st.pyplot(
-            fig3,
+            fig,
             use_container_width=True
         )
 
-        plt.close(fig3)
-
 
 
     # ========================================================
-    # 4. Seasonal distribution
+    # 4. Seasonal Distribution
     # ========================================================
+
+
+    st.markdown(
+        "### Seasonal Distribution"
+    )
 
 
     daily["month"] = (
+
         daily["date"]
-        .dt.month
+
+        .dt
+
+        .month
+
     )
 
 
-    seasonal = (
+    monthly_activity = (
+
         daily
-        .groupby("month")
-        ["GW15_AR"]
+
+        .groupby("month")[ar_column]
+
         .sum()
+
         .reset_index()
+
     )
 
 
-    fig4, ax4 = plt.subplots(
-        figsize=(8, 4)
+
+    fig, ax = plt.subplots(
+        figsize=(9,4)
     )
 
 
-    ax4.bar(
-        seasonal["month"],
-        seasonal["GW15_AR"]
+    ax.bar(
+
+        monthly_activity["month"],
+
+        monthly_activity[ar_column],
+
     )
 
 
-    ax4.set_xlabel(
+    ax.set_xlabel(
         "Month"
     )
 
-    ax4.set_ylabel(
-        "AR active days"
+
+    ax.set_ylabel(
+        "AR activity"
     )
 
 
-    ax4.set_title(
-        "Seasonal Distribution of Atmospheric River Activity"
+    ax.set_title(
+        "Seasonal Cycle of Atmospheric Rivers"
     )
 
 
-    ax4.set_xticks(
+    ax.set_xticks(
         range(1,13)
     )
 
 
-    ax4.grid(
+    ax.grid(
         True
     )
 
 
     st.pyplot(
-        fig4,
+        fig,
         use_container_width=True
     )
-
-    plt.close(fig4)
-
-
-
+    
     # ========================================================
     # Summary statistics
     # ========================================================
