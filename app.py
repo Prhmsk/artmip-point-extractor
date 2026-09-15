@@ -335,6 +335,10 @@ with st.sidebar:
 # ATMOSPHERIC RIVER TREND PLOT
 # ============================================================
 
+# ============================================================
+# ATMOSPHERIC RIVER TREND PLOT
+# ============================================================
+
 def plot_ar_trend(daily, events):
 
     st.subheader(
@@ -716,7 +720,6 @@ def plot_ar_trend(daily, events):
                 "Maximum peak IVT",
                 f"{events['peak_ivt'].max():.1f}"
             )
-
 # ============================================================
 # SINGLE LOCATION MODE
 # ============================================================
