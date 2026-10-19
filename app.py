@@ -39,6 +39,46 @@ st.set_page_config(
     layout="wide",
 )
 
+import requests
+
+with st.expander("Data server connectivity test"):
+    if st.button("Test THREDDS connection"):
+        url = (
+            "https://tds.gdex.ucar.edu/"
+            "thredds/fileServer/files/d651018/"
+            "catalogues/ERA5/guan_waliser/"
+            "ERA5.ar_tag.GuanWaliser_v2.1hr."
+            "20030101-20031231.nc"
+        )
+
+        try:
+            with requests.get(
+                url,
+                stream=True,
+                timeout=(15, 30),
+                verify=True,
+                allow_redirects=True,
+            ) as response:
+                st.write("HTTP status:", response.status_code)
+                st.write("Final URL:", response.url)
+                st.write(
+                    "Content-Type:",
+                    response.headers.get("Content-Type")
+                )
+                st.write(
+                    "Content-Length:",
+                    response.headers.get("Content-Length")
+                )
+                response.raise_for_status()
+                st.success(
+                    "HTTPS connection succeeded. "
+                    "The full file was not downloaded."
+                )
+        except requests.RequestException as exc:
+            st.error(
+                f"{type(exc).__name__}: {exc}"
+            )
+
 
 # ============================================================
 # HEADER
