@@ -67,13 +67,50 @@ EMPTY_COLUMNS = [
 ]
 
 
-def resolve_download_urls(dataset: DatasetDefinition, year: int) -> list[str]:
+
+def resolve_download_urls(
+    dataset: DatasetDefinition,
+    year: int,
+) -> list[str]:
+    """
+    Return official ARTMIP download endpoints.
+
+    THREDDS is prioritized because it provides an
+    alternative to the GDEX HTTPS/OSDF routes.
+    TLS verification remains enabled in download_file().
+    """
     filename = dataset.filename_template.format(year=year)
-    rel = dataset.relative_dir
+
+    rel = dataset.relative_dir.strip("/")
+
     return [
-        f"https://osdf-director.osg-htc.org/ncar/gdex/d651018/{rel}/{filename}",
-        f"https://data.gdex.ucar.edu/d651018/{rel}/{filename}",
-        f"https://osdf-data.gdex.ucar.edu/ncar/gdex/d651018/{rel}/{filename}",
+        # 1. NSF NCAR GDEX THREDDS HTTPServer
+        (
+            "https://tds.gdex.ucar.edu/"
+            "thredds/fileServer/files/d651018/"
+            f"{rel}/{filename}"
+        ),
+
+        # 2. OSDF Director
+        (
+            "https://osdf-director.osg-htc.org/"
+            "ncar/gdex/d651018/"
+            f"{rel}/{filename}"
+        ),
+
+        # 3. Direct GDEX HTTPS
+        (
+            "https://data.gdex.ucar.edu/"
+            "d651018/"
+            f"{rel}/{filename}"
+        ),
+
+        # 4. OSDF GDEX endpoint
+        (
+            "https://osdf-data.gdex.ucar.edu/"
+            "ncar/gdex/d651018/"
+            f"{rel}/{filename}"
+        ),
     ]
 
 
