@@ -77,6 +77,7 @@ def resolve_download_urls(dataset: DatasetDefinition, year: int) -> list[str]:
     ]
 
 
+
 def download_file(
     dataset: DatasetDefinition,
     year: int,
@@ -86,51 +87,94 @@ def download_file(
     min_bytes: int = 1_000_000,
     status_callback: Callable[[str], None] | None = None,
 ) -> Path:
+    """Download an ARTMIP annual NetCDF file with TLS verification."""
+
+    cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
+
     filename = dataset.filename_template.format(year=year)
     local_file = cache_dir / filename
+    tmp_file = local_file.with_suffix(local_file.suffix + ".part")
 
-    if local_file.exists() and not overwrite and local_file.stat().st_size >= min_bytes:
+    if (
+        local_file.exists()
+        and not overwrite
+        and local_file.stat().st_size >= min_bytes
+    ):
         if status_callback:
             status_callback(f"Using cached file: {filename}")
         return local_file
 
-    errors: list[str] = []
+    errors = []
+
     for url in resolve_download_urls(dataset, year):
         for attempt in range(1, retries + 1):
-            tmp_file = local_file.with_suffix(local_file.suffix + ".part")
             try:
                 if status_callback:
                     status_callback(
-                        f"Downloading {year}: attempt {attempt}/{retries}"
+                        f"Downloading {year}: "
+                        f"attempt {attempt}/{retries}"
                     )
+
                 with requests.get(
                     url,
                     stream=True,
                     timeout=(30, 600),
                     allow_redirects=True,
-                    headers={"User-Agent": "ARTMIP-Point-Extractor/1.0"},
+                    headers={
+                        "User-Agent": "ARTMIP-Point-Extractor/1.0"
+                    },
+                    # TLS verification stays enabled.
+                    verify=True,
                 ) as response:
                     response.raise_for_status()
+
                     total = 0
                     with tmp_file.open("wb") as handle:
-                        for chunk in response.iter_content(chunk_size=1024 * 1024):
+                        for chunk in response.iter_content(
+                            chunk_size=1024 * 1024
+                        ):
                             if chunk:
                                 handle.write(chunk)
                                 total += len(chunk)
+
                 if total < min_bytes:
-                    raise RuntimeError(f"Downloaded file is too small: {total} bytes")
+                    raise RuntimeError(
+                        f"Downloaded file is too small: "
+                        f"{total} bytes"
+                    )
+
                 tmp_file.replace(local_file)
                 return local_file
-            except Exception as exc:  # noqa: BLE001
-                errors.append(f"{url} | attempt {attempt}: {type(exc).__name__}: {exc}")
-                if tmp_file.exists():
-                    tmp_file.unlink(missing_ok=True)
+
+            except SSLError as exc:
+                errors.append(
+                    f"{url}: TLS verification failed: {exc}"
+                )
+                tmp_file.unlink(missing_ok=True)
+
+                # Certificate errors are generally not transient.
+                # Try the next verified endpoint.
+                break
+
+            except (RequestException, OSError, RuntimeError) as exc:
+                errors.append(
+                    f"{url} | attempt {attempt}: "
+                    f"{type(exc).__name__}: {exc}"
+                )
+                tmp_file.unlink(missing_ok=True)
+
                 if attempt < retries:
                     time.sleep(2 * attempt)
 
-    raise RuntimeError("; ".join(errors[-6:]))
-
+    raise RuntimeError(
+        f"Unable to download ARTMIP catalogue for {year}.\n"
+        "All configured data endpoints failed.\n"
+        "Check TLS certificate trust, network proxy settings, "
+        "and GDEX server availability.\n"
+        "Do not disable TLS verification.\n\n"
+        + "\n".join(errors[-6:])
+    )
 
 def _find_coord_name(ds: xr.Dataset, candidates: Iterable[str]) -> str | None:
     for name in candidates:
