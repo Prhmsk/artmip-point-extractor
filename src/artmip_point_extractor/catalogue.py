@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from requests.exceptions import SSLError, RequestException
 import time
 from dataclasses import dataclass
 from pathlib import Path
