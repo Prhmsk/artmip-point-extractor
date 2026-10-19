@@ -9,3 +9,5 @@ openpyxl
 netCDF4
 h5netcdf
 XlsxWriter
+requests>=2.32.3
+certifi>=2025.1.31
